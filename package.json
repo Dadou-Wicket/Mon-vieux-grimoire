@@ -1,0 +1,13 @@
+{
+  "name": "mon-vieux-grimoire",
+  "version": "1.0.0",
+  "description": "API back-end du site Mon Vieux Grimoire",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
