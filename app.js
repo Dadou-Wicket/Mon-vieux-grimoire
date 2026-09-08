@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const Book = require("./models/book");
+const User = require("./models/user");
 
 mongoose
   .connect(process.env.MONGODB_URI)
