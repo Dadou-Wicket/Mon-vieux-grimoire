@@ -3,9 +3,16 @@ const Book = require("../models/book");
 
 // Récupère tous les livres présents dans la base de données.
 exports.getAllBooks = (req, res, next) => {
+  console.log("➡️ GET /api/books appelé");
   Book.find()
-    .then((books) => res.status(200).json(books))
-    .catch((error) => res.status(400).json({ error }));
+    .then((books) => {
+      console.log("➡️ Livres trouvés :", books);
+      res.status(200).json(books);
+    })
+    .catch((error) => {
+      console.error("❌ ERREUR GET /api/books :", error);
+      res.status(400).json({ error });
+    });
 };
 
 // Récupère un livre à partir de son identifiant.
