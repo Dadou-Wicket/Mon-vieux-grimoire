@@ -10,6 +10,7 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.9.5"
+    "mongoose": "^9.9.5",
+    "mongoose-unique-validator": "^6.1.1"
   }
 }
