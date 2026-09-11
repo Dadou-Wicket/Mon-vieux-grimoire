@@ -96,7 +96,6 @@ exports.updateBook = (req, res, next) => {
               }
             });
           }
-
           res.status(200).json({ message: "Livre modifié !" });
         })
         .catch((error) => res.status(400).json({ error }));
