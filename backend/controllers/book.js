@@ -2,7 +2,7 @@ const fs = require("fs");
 const Book = require("../models/book");
 const path = require("path");
 
-// Récupère tous les livres présents dans la base de données.
+// Récupèrer tous les livres présents dans la base de données.
 exports.getAllBooks = (req, res, next) => {
   Book.find()
     .then((books) => {
@@ -14,7 +14,7 @@ exports.getAllBooks = (req, res, next) => {
     });
 };
 
-// Récupère un livre à partir de son identifiant.
+// Récupèrer un livre à partir de son identifiant.
 exports.getOneBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
@@ -26,7 +26,7 @@ exports.getOneBook = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-// Récupère les trois livres ayant les meilleures notes moyennes.
+// Récupèrer les trois livres ayant les meilleures notes moyennes.
 exports.getBestRatedBooks = (req, res, next) => {
   Book.find()
     .sort({ averageRating: -1 })
@@ -35,17 +35,19 @@ exports.getBestRatedBooks = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-// Crée un nouveau livre dans la base de données.
+// Créer un nouveau livre dans la base de données.
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   delete bookObject._id;
   delete bookObject.userId;
   delete bookObject.ratings;
   delete bookObject.averageRating;
+  const imagePath = __dirname + `/../images/${req.file.filename}`;
   const book = new Book({
     ...bookObject,
     userId: req.auth.userId,
     imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+    imagePath,
     ratings: [],
     averageRating: 0,
   });
@@ -55,11 +57,12 @@ exports.createBook = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-// Modifie un livre existant.
+// Modifier un livre existant.
 exports.updateBook = (req, res, next) => {
+  const book = req.body;
   const bookObject = req.file
     ? {
-        ...JSON.parse(req.body.book),
+        ...book,
         imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
       }
     : { ...req.body };
@@ -73,6 +76,15 @@ exports.updateBook = (req, res, next) => {
       }
       if (book.userId !== req.auth.userId) {
         return res.status(403).json({ message: "unauthorized request" });
+      }
+      if (req.file) {
+        bookObject.imagePath = path.resolve(
+          __dirname,
+          "../images",
+          req.file.filename,
+        );
+      } else {
+        bookObject.imagePath = book.imagePath;
       }
       const oldFilename = book.imageUrl.split("/images/")[1];
       Book.updateOne(
@@ -103,7 +115,7 @@ exports.updateBook = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-// Supprime un livre.
+// Supprimer un livre.
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
@@ -113,8 +125,8 @@ exports.deleteBook = (req, res, next) => {
       if (book.userId !== req.auth.userId) {
         return res.status(403).json({ message: "unauthorized request" });
       }
-      const filename = book.imageUrl.split("/images/")[1];
-      fs.unlink(`images/${filename}`, (error) => {
+
+      fs.unlink(book.imagePath, (error) => {
         if (error) {
           console.error("Erreur lors de la suppression de l'image :", error);
           return res.status(500).json({ error });
@@ -129,7 +141,7 @@ exports.deleteBook = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-// Ajoute une note à un livre.
+// Ajouter une note à un livre.
 exports.rateBook = (req, res, next) => {
   const rating = Number(req.body.rating);
   const userId = req.auth.userId;
